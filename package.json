@@ -1,0 +1,35 @@
+{
+  "name": "@opsimathically/dirmap",
+  "version": "1.0.2",
+  "description": "Recurses through all files and directories from a provided base directory, and provides information about contents, and optionally executes a callback.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "test": "ts-node -r tsconfig-paths/register test/DirMap.test.ts"
+  },
+  "keywords": [
+    "directory",
+    "map",
+    "files",
+    "permissions"
+  ],
+  "homepage": "https://github.com/opsimathically/dirmap",
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/wtfnode": "^0.7.3",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.20.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.5.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0",
+    "wtfnode": "^0.10.0"
+  },
+  "author": "Jason Medeiros",
+  "license": "MIT"
+}
