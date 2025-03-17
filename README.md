@@ -109,3 +109,83 @@ import { DirMap, file_info_t } from '@opsimathically/dirmap';
   });
 })();
 ```
+
+## Example File Entry Data
+
+Each file mapped will correspond a file_info_t object, which will
+appear as follows.
+
+```typescript
+// example object output for /etc/hosts
+{
+  name: 'hosts',
+  raw_stats: {
+    dev: 66306,
+    mode: 33188,
+    nlink: 1,
+    uid: 0,
+    gid: 0,
+    rdev: 0,
+    blksize: 4096,
+    ino: 28708018,
+    size: 315,
+    blocks: 8,
+    atimeMs: 1742196218432.5286,
+    mtimeMs: 1737011996644.207,
+    ctimeMs: 1737011996645.207,
+    birthtimeMs: 1737011996644.207
+  },
+  type_info: {
+    is_dir: false,
+    is_block_dev: false,
+    is_char_dev: false,
+    is_fifo: false,
+    is_file: true,
+    is_socket: false,
+    is_symlink: false
+  },
+  file_md5: undefined,
+  permissions: {
+    owner: {
+      readable: true,
+      writable: true,
+      executable: false,
+      suid: false,
+      guid: false,
+      sticky: false
+    },
+    group: {
+      readable: true,
+      writable: false,
+      executable: false,
+      suid: false,
+      guid: false,
+      sticky: false
+    },
+    others: {
+      readable: true,
+      writable: false,
+      executable: false,
+      suid: false,
+      guid: false,
+      sticky: false
+    },
+    processUser: {
+      readable: true,
+      writable: false,
+      executable: false,
+      suid: false,
+      guid: false,
+      sticky: false
+    },
+    sticky: false
+  },
+  absolute_path: '/etc/hosts',
+  relative_path: '/hosts',
+  base_path: '/etc',
+  file_or_dir_path: '/etc',
+  owner: { uid: 0, gid: 0 },
+  process: { uid: 1000, gid: 1000 },
+  extra: {}
+}
+```

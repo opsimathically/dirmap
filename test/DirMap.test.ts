@@ -60,6 +60,7 @@ import { file_info_t } from '@src/types';
       base_dir: '/etc/',
       onfoundcb: async function (this: DirMap, file_info: file_info_t) {
         if (file_info.absolute_path === '/etc/hosts') {
+          console.debug(file_info);
           return true;
         }
         return false;
