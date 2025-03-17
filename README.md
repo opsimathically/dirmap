@@ -1,11 +1,18 @@
-# changemon
+# dirmap
 
-Watch objects for changes, and execute callbacks when they do. Take the data from the callbacks and apply those changes to any other objects, or don't. This can be used for auto-updating database records, synchronizing data across the network, and all sorts of other neat things.
+Recurse through the filesystem, stat and map individual files, directories, and devices, and store them within
+relevant maps as a file-info type, containing relevant permissions information for the current user, other users,
+etc. Developers determine what to map using callbacks; if no callback is provided, everything found will be mapped.  
+Map some, map none, map all, or just operate on individual files via callbacks individually. This code is useful for
+finding things like bad security permissions which could lead to system security problems, finding arbitrary files,
+finding files of certain sizes, md5 hashing files, etc. Subsequent runs on multiple directories will compound the
+maps so that one object can store multiple directory recursions. To empty all the maps and start fresh, use the
+dirmap.reset() method. This code was designed to work on Linux.
 
 ## Install
 
 ```bash
-npm install changemon
+npm install @opsimathically/dirmap
 ```
 
 ## Building from source
@@ -17,93 +24,75 @@ clone this repo, enter directory, and run `npm install` for dev dependencies, th
 ## Usage
 
 ```typescript
-import { applyChange, ChangeMon, changemon_path_t } from 'changemon';
+import { DirMap, file_info_t } from '@opsimathically/dirmap';
 
 (async function () {
-  type your_watched_type_t = {
-    hello: string;
-    there: number;
-    how: number[];
-    are: object;
-    you: boolean;
-  };
+  /*
+  Entries are mapped via a filesystem absolute path as key and can be accessed via
+  individual maps shown below.  Maps are separated by type to reduce the work a developer
+  would need to do to make this code useful for their specific tasks.
+  
+  // this map holds all entries of all types
+  dirmap.result_map
 
-  type your_extra_data_type_t = number;
+  // these maps hold only specific types
+  dirmap.directory_map
+  dirmap.block_dev_map
+  dirmap.char_dev_map
+  dirmap.fifo_map
+  dirmap.file_map
+  dirmap.socket_map
+  dirmap.symlink_map
+  dirmap.other_map
+  */
 
-  const changemon_ref = new ChangeMon<your_extra_data_type_t>(777);
-
-  const some_other_object_you_want_to_also_apply_changes_to = {
-    hello: 'hi',
-    there: -1,
-    how: [],
-    are: {},
-    you: true
-  };
-
-  const your_watched_object = changemon_ref.watch<your_watched_type_t>(
-    {
-      hello: 'a string',
-      there: 10,
-      how: [1, 2, 3, 4],
-      are: {},
-      you: true
-    },
-    (
-      old_val: any,
-      new_val: any,
-      path: changemon_path_t,
-      changemon_ref: ChangeMon<number>
-    ) => {
-      //
-      // old_val:
-      // This is the value prior to the change.
-      //
-      // new_val:
-      // This is the value that it will be changed to.
-      //
-      // path:
-      // This is an array of paths and types to get to the value being
-      // changed.
-      //
-      // changemon_ref:
-      // This is a changemon self reference, from which you an access the extra
-      // passthrough data.  In this case it's the number 777, in your case, it's
-      // an object, or database handles or whatever you want.
-      //
-      // applyChange:
-      // this will propagate the current path and changes into an unrelated and
-      // unwatched object.  You can use this to patch data locally, or between hosts,
-      // or however you want.  Just pass in a path and a value and it'll patch things
-      // up for you.
-      applyChange(
-        some_other_object_you_want_to_also_apply_changes_to,
-        path,
-        new_val
-      );
+  // create a new dirmap, execute it against the etc directory, map
+  // all files and create md5 hashes.  No callback provided.
+  const dirmap = new DirMap();
+  await dirmap.run({
+    base_dir: '/etc/',
+    options: {
+      generate_file_md5s: true
     }
-  );
+  });
 
-  // Each change here will trigger the change callback above
-  your_watched_object.hello = 'a different string';
-  your_watched_object.there = 20;
-  your_watched_object.how.push(5);
-  your_watched_object.are = { a: 'b' };
-  your_watched_object.you = false;
+  // run dirmap again against /dev/ without resetting.  The results of
+  // both runs will be within the dirmap map sets.  This time we do not
+  // md5 discovered files since the option was not provided.
+  await dirmap.run({
+    base_dir: '/dev/'
+  });
 
-  // This will unwatch the watched object, returning the original data and removing
-  // it from the ChangeMon weak map.
-  const unwatched_original_object = changemon_ref.unwatch(your_watched_object);
+  // reset the maps to empty them all out and start fresh
+  dirmap.reset();
 
-  // IMPORTANT:
-  // In the console output, do note that the "how" property (array), only has values which
-  // were changed, propagated.  Since the some_other_object_you_want_to_also_apply_changes_to
-  // object doesn't initially have any values in it, you will have 4 empty values in the array, and
-  // the number 5.  This is by design, and intentional.  If you want all other values propagated,
-  // you'll have to do that in the change callback.
-  console.log({
-    unwatched_original_object: unwatched_original_object,
-    some_other_object_you_want_to_also_apply_changes_to:
-      some_other_object_you_want_to_also_apply_changes_to
+  // run dirmap using a found callback.  This allows us to filter what gets
+  // mapped and what doesn't.  In this case, we're just looking for the /etc/hosts
+  // file.  Since we return true from the callback, only on this file, all of our
+  // maps will only contain this single entry.  You an filter any file(s) you'd like,
+  // just return true when a file matches your desired criteria, and it will be mapped.
+  await dirmap.run({
+    base_dir: '/etc/',
+    onfoundcb: async function (this: DirMap, file_info: file_info_t) {
+      if (file_info.absolute_path === '/etc/hosts') {
+        return true;
+      }
+      return false;
+    }
+  });
+
+  // You can also supply a fail callback, that will let you determine what failed to
+  // map due to whatever error.  We use any for the error as we can get arbitrary error
+  // codes from arbitrary systems.
+  await dirmap.run({
+    base_dir: '/root/',
+    onfoundcb: async function (this: DirMap, file_info: file_info_t) {
+      return false;
+    },
+    onfailcb: async function (this: DirMap, absolute_path: string, err: any) {
+      console.log(`Could not map: ${absolute_path}`);
+      return false;
+    }
   });
 })();
 ```
