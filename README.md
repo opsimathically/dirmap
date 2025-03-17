@@ -1,15 +1,20 @@
 # dirmap
 
-Recurse through the filesystem, stat and map individual files, directories, and devices, and store them within
-relevant maps as a file-info type, containing relevant permissions information for the current user, other users,
-etc. Developers determine what to map using callbacks; if no callback is provided, everything found will be mapped.
+Recurse through the filesystem, stat and map individual files, directories,
+and devices, and store them within relevant maps as a file-info type, containing
+relevant permissions information for the current user, other users, etc. Developers
+determine what to map using callbacks; if no callback is provided, everything
+found will be mapped.
 
-Map some, map none, map all, or just operate on individual files via callbacks individually. This code is useful for
-finding things like bad security permissions which could lead to system security problems, finding arbitrary files,
-finding files of certain sizes, md5 hashing files, etc. Subsequent runs on multiple directories will compound the
-maps so that one object can store multiple directory recursions.
+Map some, map none, map all, or just operate on individual files via callbacks
+individually. This code is useful for finding things like bad security permissions
+which could lead to system security problems, finding arbitrary files, finding files
+of certain sizes, md5 hashing files, etc. Subsequent runs on multiple directories
+will compound the maps so that one object can store multiple directory recursions.
 
-To empty all the maps and start fresh, use the dirmap.reset() method. This code was designed to work on Linux.
+To empty all the maps, reset state, and start fresh, use the dirmap.reset() method.
+Call dirmap.stop() from within found/fail callback to stop recursing.
+This code was designed to work on Linux.
 
 ## Install
 
@@ -73,10 +78,14 @@ import { DirMap, file_info_t } from '@opsimathically/dirmap';
   // file.  Since we return true from the callback, only on this file, all of our
   // maps will only contain this single entry.  You an filter any file(s) you'd like,
   // just return true when a file matches your desired criteria, and it will be mapped.
+  //
+  // We use this.stop() to stop recursion after the file is found.
+  //
   await dirmap.run({
     base_dir: '/etc/',
     onfoundcb: async function (this: DirMap, file_info: file_info_t) {
       if (file_info.absolute_path === '/etc/hosts') {
+        this.stop();
         return true;
       }
       return false;

@@ -1,7 +1,7 @@
 {
   "name": "@opsimathically/dirmap",
-  "version": "1.0.2",
-  "description": "Recurses through all files and directories from a provided base directory, and provides information about contents, and optionally executes a callback.",
+  "version": "1.0.3",
+  "description": "Recurses through all files and directories from a provided base directory, and provides information and utility.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
