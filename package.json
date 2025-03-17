@@ -1,6 +1,6 @@
 {
   "name": "@opsimathically/dirmap",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Recurses through all files and directories from a provided base directory, and provides information and utility.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

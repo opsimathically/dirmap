@@ -35,9 +35,10 @@ import { DirMap, file_info_t } from '@opsimathically/dirmap';
 
 (async function () {
   /*
-  Entries are mapped via a filesystem absolute path as key and can be accessed via
-  individual maps shown below.  Maps are separated by type to reduce the work a developer
-  would need to do to make this code useful for their specific tasks.
+  Entries are mapped via a filesystem absolute path as key and can be 
+  accessed via individual maps shown below.  Maps are separated by type
+  to reduce the work a developer would need to do to make this code 
+  useful for their specific tasks.
   
   // this map holds all entries of all types
   dirmap.result_map
@@ -73,11 +74,12 @@ import { DirMap, file_info_t } from '@opsimathically/dirmap';
   // reset the maps to empty them all out and start fresh
   dirmap.reset();
 
-  // run dirmap using a found callback.  This allows us to filter what gets
-  // mapped and what doesn't.  In this case, we're just looking for the /etc/hosts
-  // file.  Since we return true from the callback, only on this file, all of our
-  // maps will only contain this single entry.  You an filter any file(s) you'd like,
-  // just return true when a file matches your desired criteria, and it will be mapped.
+  // run dirmap using a found callback.  This allows us to filter
+  // what gets mapped and what doesn't.  In this case, we're just looking
+  // for the /etc/hosts file.  Since we return true from the callback,
+  // only on this file, all of our maps will only contain this single entry.
+  // You an filter any file(s) you'd like, just return true when a file
+  // matches your desired criteria, and it will be mapped.
   //
   // We use this.stop() to stop recursion after the file is found.
   //
@@ -92,9 +94,9 @@ import { DirMap, file_info_t } from '@opsimathically/dirmap';
     }
   });
 
-  // You can also supply a fail callback, that will let you determine what failed to
-  // map due to whatever error.  We use any for the error as we can get arbitrary error
-  // codes from arbitrary systems.
+  // You can also supply a fail callback, that will let you determine
+  // what failed to map due to whatever error.  We use any for the error
+  // as we can get arbitrary error codes from arbitrary systems.
   await dirmap.run({
     base_dir: '/root/',
     onfoundcb: async function (this: DirMap, file_info: file_info_t) {
